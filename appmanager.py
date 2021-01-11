@@ -18,11 +18,25 @@ class AppManager():
         return f'name: {self.name}, database: {self.database}, models: {self.models}, blueprints: {self.blueprints}, blueprint_names: {self.blueprint_names}'
 
 
+    def delete_app(self):
+        try:
+            shutil.rmtree(self.paths['app_dir'])
+        except OSError as e:
+            print('ERROR: App could not be deleted.')
+            print(e)
+
+
     def create_files(self, files):
-        for path, code in files.items():
-            with open(path, 'w') as f:
-                f.write(str(code))
-                f.close()
+        try:
+            for path, code in files.items():
+                with open(path, 'w') as f:
+                    f.write(str(code))
+                    f.close()
+        except EnvironmentError as e:
+            print('ERROR: Could not write files.')
+            print(e)
+            self.delete_app()
+            sys.exit()
 
 
     def create_dirs(self):
@@ -53,7 +67,7 @@ class AppManager():
                 print('ERROR: Folders could not be created.')
                 print(str(e))
                 if 'app_dir' in paths and op.exists(paths['app_dir']):
-                    shutil.rmtree(paths['app_dir'])
+                    self.delete_app()
                 return sys.exit()
         else:
             print('ERROR: App folder already exists. Please select another app name or remove the folder.')
